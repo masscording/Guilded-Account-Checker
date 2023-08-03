@@ -6,30 +6,32 @@ import time
 import threading
 from colorama import Fore, Back, Style
 from os import system
+from concurrent.futures import ThreadPoolExecutor
+
 
 colorama.init()
 
 if not os.path.exists("proxies.txt"):
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTRED_EX}ERROR {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}proxies.txt {Fore.LIGHTBLACK_EX}not found{Fore.RESET}")
-    with open("proxies.txt", "w") as f:
+    with open("proxies.txt", "w", encoding="utf-8") as f:
         f.write("")
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTGREEN_EX}SUCCESS {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}proxies.txt {Fore.LIGHTBLACK_EX}created{Fore.RESET}")
     input(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] Press {Fore.LIGHTBLACK_EX}ENTER {Fore.RESET}to close{Fore.RESET}")
     exit()
 if not os.path.exists("combo.txt"):
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTRED_EX}ERROR {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}combo.txt {Fore.LIGHTBLACK_EX}not found{Fore.RESET}")
-    with open("combo.txt", "w") as f:
+    with open("combo.txt", "w", encoding="utf-8") as f:
         f.write("")
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTGREEN_EX}SUCCESS {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}combo.txt {Fore.LIGHTBLACK_EX}created{Fore.RESET}")
     input(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] Press {Fore.LIGHTBLACK_EX}ENTER {Fore.RESET}to close{Fore.RESET}")
     exit()
 
-if len(open("combo.txt").readlines()) == 0:
+if len(open("combo.txt", encoding="utf-8").readlines()) == 0:
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTRED_EX}ERROR {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}combo.txt {Fore.LIGHTBLACK_EX}is empty{Fore.RESET}")
     input(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] Press {Fore.LIGHTBLACK_EX}ENTER {Fore.RESET}to close{Fore.RESET}")
     exit()
 
-if len(open("proxies.txt").readlines()) == 0:
+if len(open("proxies.txt", encoding="utf-8").readlines()) == 0:
     print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTRED_EX}ERROR {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}proxies.txt {Fore.LIGHTBLACK_EX}is empty{Fore.RESET}")
     input(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] Press {Fore.LIGHTBLACK_EX}ENTER {Fore.RESET}to close{Fore.RESET}")
     exit()
@@ -74,13 +76,19 @@ def generate_guilded_account(email, password):
         return generate_guilded_account(email, password)
 
 def main():
-    with open("combo.txt", "r") as file:
+    with open("combo.txt", "r", encoding="utf-8") as file:
         lines = file.readlines()
+        
+    max_workers = 100  
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for line in lines:
-            email, password = line.strip().split(":")
-            thread = threading.Thread(target=generate_guilded_account, args=(email, password))
-            thread.start()
+            account_info = line.strip().split(":")
+            if len(account_info) >= 2:
+                email = account_info[0]
+                password = ":".join(account_info[1:]) 
+                executor.submit(generate_guilded_account, email, password)
+            else:
+                print(f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{time.strftime(f'%H{Fore.RESET}:{Fore.LIGHTBLACK_EX}%M{Fore.RESET}:{Fore.LIGHTBLACK_EX}%S')}{Fore.RESET}] {Fore.LIGHTRED_EX}ERROR {Fore.RESET}➜ {Fore.LIGHTBLACK_EX}Invalid combo format{Fore.RESET}")
 
 if __name__ == "__main__":
     main()
-

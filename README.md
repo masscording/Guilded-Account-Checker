@@ -28,8 +28,8 @@ pip install httpx colorama
  - `proxies.txt`: This file should contain a list of HTTP proxies, one per line, in the following format:
 
    ```
-   http://username:password@ip:port
-   http://username:password@ip:port
+   username:password@ip:port
+   username:password@ip:port
    ```
 
 2. **Running the script**
